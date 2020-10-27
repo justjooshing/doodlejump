@@ -39,6 +39,50 @@ const move = (event) => {
   }
 };
 
+let fallIntervalTimer;
+let jumpIntervalTimer;
+let isJumping = false;
+
+const fall = () => {
+  isJumping = false;
+  clearInterval(jumpIntervalTimer);
+  fallIntervalTimer = setInterval(() => {
+    spriteSpaceBottom -= 5;
+    sprite.style.bottom = `${spriteSpaceBottom}px`;
+    if (spriteSpaceBottom <= -5) {
+      gameOver();
+    }
+    platforms.forEach((platform) => {
+      if (
+        spriteSpaceBottom >= platform.bottom &&
+        spriteSpaceBottom < platform.bottom + 15 &&
+        spriteSpaceLeft + 80 >= platform.left &&
+        spriteSpaceLeft < platform.left + 85
+      ) {
+        startPoint = spriteSpaceBottom;
+        jump();
+      }
+    });
+  }, 20);
+};
+
+const jump = () => {
+  if (!isJumping) {
+    isJumping = true;
+    clearInterval(fallIntervalTimer);
+    jumpIntervalTimer = setInterval(() => {
+      spriteSpaceBottom += 10;
+      sprite.style.bottom = `${spriteSpaceBottom}px`;
+
+      if (spriteSpaceBottom > startPoint + 200) {
+        fall();
+      }
+    }, 10);
+
+    score();
+  }
+};
+
 //platform create
 let platforms = [];
 
@@ -87,50 +131,6 @@ const platformMove = () => {
   }
 };
 
-let fallIntervalTimer;
-let jumpIntervalTimer;
-let isJumping = false;
-
-const fall = () => {
-  isJumping = false;
-  clearInterval(jumpIntervalTimer);
-  fallIntervalTimer = setInterval(() => {
-    spriteSpaceBottom -= 5;
-    sprite.style.bottom = `${spriteSpaceBottom}px`;
-    if (spriteSpaceBottom <= -5) {
-      gameOver();
-    }
-    platforms.forEach((platform) => {
-      if (
-        spriteSpaceBottom >= platform.bottom &&
-        spriteSpaceBottom < platform.bottom + 15 &&
-        spriteSpaceLeft + 80 >= platform.left &&
-        spriteSpaceLeft < platform.left + 85
-      ) {
-        startPoint = spriteSpaceBottom;
-        jump();
-      }
-    });
-  }, 20);
-};
-
-const jump = () => {
-  if (!isJumping) {
-    isJumping = true;
-    clearInterval(fallIntervalTimer);
-    jumpIntervalTimer = setInterval(() => {
-      spriteSpaceBottom += 10;
-      sprite.style.bottom = `${spriteSpaceBottom}px`;
-
-      if (spriteSpaceBottom > startPoint + 200) {
-        fall();
-      }
-    }, 20);
-
-    score();
-  }
-};
-
 //score
 const scoreDiv = document.getElementById("running-score");
 let currentScore = 0;
@@ -143,10 +143,10 @@ const score = () => {
 const gameStart = () => {
   currentScore = 0;
   platforms = [];
-  //   isJumping = false;
+  isJumping = false;
   createPlatforms();
   createSprite();
-  setInterval(platformMove, 30);
+  setInterval(platformMove, 15);
   document.addEventListener("keydown", move);
   jump();
   const endGame = document.getElementById("end-game");
